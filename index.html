@@ -1,0 +1,1905 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CDMB Inventario Equipos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+<style>
+:root {
+  --teal-dark: #1a4a3a;
+  --teal-mid: #2d6b56;
+  --teal-light: #3d8b6e;
+  --teal-accent: #4caf8a;
+  --teal-pale: #e8f5f0;
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --surface2: #f9fafb;
+  --border: #d8e4e0;
+  --text: #1a2e27;
+  --text-muted: #5a7a6e;
+  --text-light: #8aab9e;
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --warn: #e67e22;
+  --warn-bg: #fef6ec;
+  --ok: #27ae60;
+  --ok-bg: #eafaf1;
+  --info: #2980b9;
+  --info-bg: #eaf4fb;
+  --shadow-sm: 0 1px 3px rgba(26,74,58,.08);
+  --shadow-md: 0 4px 12px rgba(26,74,58,.12);
+  --shadow-lg: 0 8px 24px rgba(26,74,58,.16);
+  --radius: 10px;
+  --radius-sm: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1f1a;
+    --surface: #1a2e27;
+    --surface2: #1f3830;
+    --border: #2d4a3e;
+    --text: #e8f5f0;
+    --text-muted: #8aab9e;
+    --text-light: #5a7a6e;
+    --teal-pale: #1a3a2e;
+    --danger-bg: #2c1210;
+    --warn-bg: #2c1e0a;
+    --ok-bg: #0f2a1c;
+    --info-bg: #0a1e2c;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1f1a; --surface: #1a2e27; --surface2: #1f3830;
+  --border: #2d4a3e; --text: #e8f5f0; --text-muted: #8aab9e;
+  --text-light: #5a7a6e; --teal-pale: #1a3a2e;
+  --danger-bg: #2c1210; --warn-bg: #2c1e0a; --ok-bg: #0f2a1c; --info-bg: #0a1e2c;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.3); --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html { font-size: 15px; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+
+/* ─── TOKEN PANEL ─── */
+.token-panel { background: var(--info-bg); border-bottom: 1px solid var(--border); }
+.token-panel-inner { display: flex; align-items: flex-start; gap: 12px; padding: 12px max(16px,env(safe-area-inset-left,0px)); max-width: 1200px; margin: 0 auto; }
+.token-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+.token-body { flex: 1; min-width: 0; }
+.token-body strong { font-size: .9rem; color: var(--info); }
+.token-body p { font-size: .8rem; color: var(--text-muted); margin: 2px 0 8px; }
+.token-body p a { color: var(--info); }
+.token-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.token-row input { flex: 1; min-width: 200px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: .85rem; font-family: monospace; }
+.token-status { font-size: .78rem; color: var(--ok); margin-top: 4px; display: block; }
+.token-banner { padding: 6px max(16px,env(safe-area-inset-left,0px)); font-size: .82rem; text-align: center; }
+.token-banner.ok { background: var(--ok-bg); color: var(--ok); }
+.token-banner.warn { background: var(--warn-bg); color: var(--warn); }
+.btn-sm { padding: 5px 12px; font-size: .82rem; }
+
+/* ─── HEADER ─── */
+.app-header {
+  background: var(--teal-dark);
+  color: #fff;
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px max(16px, env(safe-area-inset-left, 0px)) 10px max(16px, env(safe-area-inset-right, 0px));
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.header-logo {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.header-title { flex: 1; }
+.header-title h1 { font-size: 1rem; font-weight: 700; letter-spacing: .01em; }
+.header-title p { font-size: .72rem; opacity: .75; }
+.header-actions { display: flex; gap: 8px; }
+.btn-icon {
+  width: 36px; height: 36px; border: none; border-radius: 8px;
+  background: rgba(255,255,255,.12); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: background .15s;
+}
+.btn-icon:hover { background: rgba(255,255,255,.22); }
+
+/* ─── NAV ─── */
+.app-nav {
+  background: var(--teal-mid);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.app-nav::-webkit-scrollbar { display: none; }
+.nav-inner {
+  display: flex;
+  padding: 0 max(16px, env(safe-area-inset-left, 0px));
+  max-width: 1200px; margin: 0 auto;
+}
+.nav-tab {
+  padding: 10px 18px;
+  border: none; background: none;
+  color: rgba(255,255,255,.75);
+  font: 500 .82rem/1 'Inter', sans-serif;
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: color .15s, border-color .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-tab:hover { color: #fff; }
+.nav-tab.active { color: #fff; border-bottom-color: var(--teal-accent); }
+
+/* ─── MAIN ─── */
+.app-main {
+  max-width: 1200px; margin: 0 auto;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+}
+
+/* ─── VIEWS ─── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── CARDS / STAT ─── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-card .label { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+.stat-card .value { font-size: 2rem; font-weight: 700; line-height: 1; }
+.stat-card .sub { font-size: .72rem; color: var(--text-muted); }
+.stat-activo .value { color: var(--ok); }
+.stat-mant .value { color: var(--warn); }
+.stat-baja .value { color: var(--danger); }
+.stat-total .value { color: var(--teal-light); }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+}
+.card-title { font-size: .95rem; font-weight: 700; color: var(--text); }
+.card-body { padding: 20px; }
+
+/* ─── SEARCH BAR ─── */
+.search-row {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 16px;
+}
+.search-wrap {
+  flex: 1; min-width: 200px;
+  position: relative;
+}
+.search-wrap .ico {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text-light); font-size: 16px; pointer-events: none;
+}
+.input-search {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: 14px 'Inter', sans-serif;
+  transition: border-color .15s;
+  outline: none;
+}
+.input-search:focus { border-color: var(--teal-light); }
+
+/* ─── FILTERS ─── */
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-chip {
+  padding: 5px 14px; border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: 500 .78rem 'Inter', sans-serif;
+  cursor: pointer; transition: all .15s;
+}
+.filter-chip:hover { border-color: var(--teal-light); color: var(--teal-light); }
+.filter-chip.active { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+
+/* ─── SELECT / INPUT ─── */
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: .78rem; font-weight: 600; color: var(--text-muted); }
+.field-label span { color: var(--danger); }
+.f-input, .f-select, .f-textarea {
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: 14px 'Inter', sans-serif;
+  outline: none; transition: border-color .15s;
+  width: 100%;
+}
+.f-input:focus, .f-select:focus, .f-textarea:focus { border-color: var(--teal-light); }
+.f-textarea { resize: vertical; min-height: 80px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.form-grid .span2 { grid-column: span 2; }
+@media (max-width: 520px) { .form-grid .span2 { grid-column: span 1; } }
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: none; cursor: pointer;
+  font: 600 .85rem 'Inter', sans-serif;
+  transition: background .15s, transform .1s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--teal-dark); color: #fff; }
+.btn-primary:hover { background: var(--teal-mid); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #a93226; }
+.btn-ghost { background: transparent; color: var(--teal-light); border: 1.5px solid var(--teal-light); }
+.btn-ghost:hover { background: var(--teal-pale); }
+.btn-sm { padding: 6px 13px; font-size: .78rem; }
+.btn-warn { background: var(--warn); color: #fff; }
+.btn-ok { background: var(--ok); color: #fff; }
+
+/* ─── TABLE / LIST ─── */
+.equip-list { display: flex; flex-direction: column; gap: 1px; }
+.equip-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s;
+}
+.equip-row:first-child { border-top: none; }
+.equip-row:hover { background: var(--teal-pale); }
+.equip-row.baja { opacity: .55; }
+.equip-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: var(--teal-pale); color: var(--teal-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.equip-info h3 { font-size: .9rem; font-weight: 600; }
+.equip-info p { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+.equip-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ─── BADGE ─── */
+.badge {
+  padding: 3px 10px; border-radius: 99px;
+  font: 600 .7rem 'Inter', sans-serif; white-space: nowrap;
+}
+.badge-ok { background: var(--ok-bg); color: var(--ok); }
+.badge-warn { background: var(--warn-bg); color: var(--warn); }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+.badge-info { background: var(--info-bg); color: var(--info); }
+.badge-muted { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* ─── MODAL OVERLAY ─── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%; max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 1rem; font-weight: 700; }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+
+/* ─── DETAIL PANEL ─── */
+.detail-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px;
+  background: var(--teal-dark); color: #fff;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.detail-header .big-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.detail-header h2 { font-size: 1.05rem; font-weight: 700; }
+.detail-header p { font-size: .8rem; opacity: .8; margin-top: 3px; }
+.detail-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  overflow-x: auto; scrollbar-width: none;
+}
+.detail-tab {
+  padding: 10px 20px; border: none; background: none;
+  color: var(--text-muted); font: 600 .82rem 'Inter', sans-serif;
+  cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.detail-tab.active { color: var(--teal-dark); border-bottom-color: var(--teal-dark); }
+
+/* ─── INFO GRID ─── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px; padding: 20px;
+}
+.info-item .il { font-size: .72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.info-item .iv { font-size: .9rem; margin-top: 3px; }
+
+/* ─── PHOTOS ─── */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.photo-thumb {
+  aspect-ratio: 1; border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-add {
+  aspect-ratio: 1; border-radius: var(--radius-sm);
+  border: 2px dashed var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; cursor: pointer; color: var(--text-muted); font-size: .75rem;
+  transition: border-color .15s, color .15s;
+}
+.photo-add:hover { border-color: var(--teal-light); color: var(--teal-light); }
+.photo-add-ico { font-size: 24px; }
+
+/* ─── MAINT LIST ─── */
+.maint-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden; margin-bottom: 10px;
+}
+.maint-item-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface2);
+}
+.maint-item-body { padding: 12px 16px; font-size: .85rem; color: var(--text-muted); }
+.timeline-dot {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+
+/* ─── LOADING / EMPTY ─── */
+.loading { padding: 40px; text-align: center; color: var(--text-muted); }
+.loading .spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--teal-light);
+  border-radius: 50%; animation: spin .7s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { padding: 40px; text-align: center; color: var(--text-muted); }
+.empty-ico { font-size: 48px; margin-bottom: 10px; }
+
+/* ─── TOAST ─── */
+#toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: 9999; pointer-events: none;
+}
+.toast {
+  padding: 12px 18px; border-radius: var(--radius-sm);
+  background: var(--teal-dark); color: #fff;
+  font: 500 .85rem 'Inter', sans-serif;
+  box-shadow: var(--shadow-md);
+  opacity: 0; transform: translateX(20px);
+  transition: opacity .25s, transform .25s;
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast.error { background: var(--danger); }
+.toast.success { background: var(--ok); }
+.toast.warn { background: var(--warn); }
+
+/* ─── BACK BUTTON ─── */
+.back-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.btn-back {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none;
+  color: var(--teal-light); font: 600 .85rem 'Inter', sans-serif;
+  cursor: pointer; padding: 6px 0;
+}
+.btn-back:hover { color: var(--teal-dark); }
+
+/* ─── SECTION TITLE ─── */
+.section-title { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: 12px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .equip-row { grid-template-columns: auto 1fr; }
+  .equip-badges { grid-column: 2; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── FILE INPUT ─── */
+.file-input-hidden { display: none; }
+.file-drop {
+  border: 2px dashed var(--border); border-radius: var(--radius-sm);
+  padding: 20px; text-align: center; cursor: pointer;
+  color: var(--text-muted); transition: border-color .15s;
+}
+.file-drop:hover { border-color: var(--teal-light); color: var(--teal-light); }
+
+/* ─── ALERT BOX ─── */
+.alert {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: .85rem; display: flex; gap: 10px; align-items: flex-start;
+}
+.alert-danger { background: var(--danger-bg); color: var(--danger); }
+.alert-warn { background: var(--warn-bg); color: var(--warn); }
+.alert-ok { background: var(--ok-bg); color: var(--ok); }
+
+/* ─── DIVIDER ─── */
+hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* ─── PHOTO VIEWER ─── */
+.photo-viewer-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.85); z-index: 300;
+  align-items: center; justify-content: center;
+}
+.photo-viewer-overlay.open { display: flex; }
+.photo-viewer-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+</style>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- MODAL: DAR DE BAJA -->
+<div class="modal-overlay" id="modal-baja">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚠️ Dar de Baja Equipo</span>
+      <button class="btn-icon" style="background:var(--surface2);color:var(--text)" onclick="closeBajaModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warn">Este equipo quedará inactivo. Puede recuperarse posteriormente desde el módulo de inventario.</div>
+      <div class="field-group">
+        <label class="field-label">Equipo <span>*</span></label>
+        <input class="f-input" id="baja-equipo" readonly>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fecha de Baja <span>*</span></label>
+        <input type="date" class="f-input" id="baja-fecha">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Motivo de Baja <span>*</span></label>
+        <textarea class="f-textarea" id="baja-motivo" placeholder="Describa la razón de la baja del equipo…" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeBajaModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarBaja()">Dar de Baja</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RECUPERAR EQUIPO -->
+<div class="modal-overlay" id="modal-recuperar">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">♻️ Recuperar Equipo</span>
+      <button class="btn-icon" style="background:var(--surface2);color:var(--text)" onclick="closeRecuperarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-ok">El equipo volverá al estado <strong>Activo</strong>.</div>
+      <div class="field-group">
+        <label class="field-label">Equipo</label>
+        <input class="f-input" id="rec-equipo" readonly>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Motivo de Recuperación <span>*</span></label>
+        <textarea class="f-textarea" id="rec-motivo" placeholder="Razón por la cual se recupera el equipo…" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeRecuperarModal()">Cancelar</button>
+      <button class="btn btn-ok" onclick="confirmarRecuperar()">Recuperar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA FOTO -->
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📷 Subir Foto</span>
+      <button class="btn-icon" style="background:var(--surface2);color:var(--text)" onclick="closeFotoModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label">Descripción (opcional)</label>
+        <input class="f-input" id="foto-desc" placeholder="Ej: Vista frontal, número de serie…">
+      </div>
+      <label class="file-drop" for="foto-file-input">
+        <div style="font-size:32px">📁</div>
+        <div style="margin-top:6px;font-weight:600">Seleccionar archivo</div>
+        <div style="font-size:.78rem;margin-top:4px">JPG, PNG, GIF · máx. 10 MB</div>
+      </label>
+      <input type="file" class="file-input-hidden" id="foto-file-input" accept="image/*" onchange="previewFoto(this)">
+      <img id="foto-preview" src="" alt="" style="display:none;max-height:180px;border-radius:8px;object-fit:contain;width:100%">
+      <div id="foto-name" style="font-size:.8rem;color:var(--text-muted)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeFotoModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="subirFoto()">Subir</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO VIEWER -->
+<div class="photo-viewer-overlay" id="photo-viewer" onclick="this.classList.remove('open')">
+  <img id="photo-viewer-img" src="" alt="">
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-logo" style="background:none;padding:2px"><img src="data:image/png;base64,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" style="width:36px;height:36px;object-fit:contain" alt="CDMB"></div>
+    <div class="header-title">
+      <h1>CDMB — Recursos Físicos</h1>
+      <p>Inventario y Mantenimiento de Equipos</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" title="Tema" onclick="toggleTheme()">🌓</button>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="app-nav">
+  <div class="nav-inner">
+    <button class="nav-tab active" data-view="home" onclick="navTo('home')">🏠 Inicio</button>
+    <button class="nav-tab" data-view="inventario" onclick="navTo('inventario')">📦 Inventario</button>
+    <button class="nav-tab" data-view="mantenimiento" onclick="navTo('mantenimiento')">🔧 Mantenimiento</button>
+  </div>
+</nav>
+
+<!-- TOKEN PANEL -->
+<div id="token-panel" class="token-panel">
+  <div class="token-panel-inner">
+    <div class="token-icon">🔑</div>
+    <div class="token-body">
+      <strong>Token de acceso Microsoft</strong>
+      <p>Pega aquí tu token Bearer para conectar con SharePoint. <a href="#" id="btn-get-token" target="_blank">¿Cómo obtener el token?</a></p>
+      <div class="token-row">
+        <input type="password" id="token-input" placeholder="eyJ0eXAiOiJKV1QiLCJhb..." autocomplete="off" spellcheck="false">
+        <button class="btn-primary btn-sm" id="btn-save-token">Conectar</button>
+        <button class="btn-outline btn-sm" id="btn-clear-token">Borrar</button>
+      </div>
+      <span id="token-status" class="token-status"></span>
+    </div>
+  </div>
+  <div id="token-banner" class="token-banner" hidden></div>
+</div>
+
+<!-- MAIN -->
+<main class="app-main">
+
+  <!-- ═══ VIEW: HOME ═══ -->
+  <div class="view active" id="view-home">
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:1.15rem;font-weight:700">Panel de Control</h2>
+      <p style="font-size:.82rem;color:var(--text-muted);margin-top:3px">Resumen del inventario de equipos CDMB</p>
+    </div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card stat-total">
+        <div class="label">Total Equipos</div>
+        <div class="value" id="stat-total">—</div>
+        <div class="sub">Registrados</div>
+      </div>
+      <div class="stat-card stat-activo">
+        <div class="label">Activos</div>
+        <div class="value" id="stat-activo">—</div>
+        <div class="sub">En operación</div>
+      </div>
+      <div class="stat-card stat-mant">
+        <div class="label">En Mantenimiento</div>
+        <div class="value" id="stat-mant">—</div>
+        <div class="sub">Temporalmente fuera</div>
+      </div>
+      <div class="stat-card stat-baja">
+        <div class="label">Dados de Baja</div>
+        <div class="value" id="stat-baja">—</div>
+        <div class="sub">Desactivados</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚡ Acciones Rápidas</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-wrap:wrap;gap:12px">
+        <button class="btn btn-primary" onclick="navTo('inventario');setTimeout(()=>openEquipoForm(null),200)">➕ Nuevo Equipo</button>
+        <button class="btn btn-ghost" onclick="navTo('inventario')">📋 Ver Inventario</button>
+        <button class="btn btn-ghost" onclick="navTo('mantenimiento');setTimeout(()=>openMaintForm(null),200)">🔧 Registrar Mantenimiento</button>
+      </div>
+    </div>
+
+    <div style="margin-top:20px" class="card">
+      <div class="card-header">
+        <span class="card-title">📊 Últimos Equipos Registrados</span>
+        <button class="btn btn-sm btn-ghost" onclick="navTo('inventario')">Ver todos</button>
+      </div>
+      <div id="home-recent">
+        <div class="loading"><div class="spinner"></div>Cargando…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: INVENTARIO ═══ -->
+  <div class="view" id="view-inventario">
+    <!-- LIST PANEL -->
+    <div id="panel-list">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <div>
+          <h2 style="font-size:1.1rem;font-weight:700">Inventario de Equipos</h2>
+          <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px" id="inv-count-label">Cargando…</p>
+        </div>
+        <button class="btn btn-primary" onclick="openEquipoForm(null)">➕ Agregar Equipo</button>
+      </div>
+
+      <div class="card">
+        <div class="card-body" style="padding-bottom:8px">
+          <div class="search-row">
+            <div class="search-wrap">
+              <span class="ico">🔍</span>
+              <input class="input-search" id="inv-search" placeholder="Buscar por nombre, código, marca…" oninput="filterEquipos()">
+            </div>
+            <select class="f-select" id="inv-filter-sede" style="max-width:170px" onchange="filterEquipos()">
+              <option value="">Todas las Sedes</option>
+            </select>
+            <select class="f-select" id="inv-filter-tipo" style="max-width:160px" onchange="filterEquipos()">
+              <option value="">Todos los Tipos</option>
+            </select>
+          </div>
+          <div class="filter-row" id="estado-chips">
+            <button class="filter-chip active" data-estado="" onclick="selectEstadoChip(this)">Todos</button>
+            <button class="filter-chip" data-estado="Activo" onclick="selectEstadoChip(this)">✅ Activo</button>
+            <button class="filter-chip" data-estado="En Mantenimiento" onclick="selectEstadoChip(this)">🔧 En Mantenimiento</button>
+            <button class="filter-chip" data-estado="Fuera de Servicio" onclick="selectEstadoChip(this)">⛔ Fuera de Servicio</button>
+            <button class="filter-chip" data-estado="Dado de Baja" onclick="selectEstadoChip(this)">🗃️ Dado de Baja</button>
+          </div>
+        </div>
+        <div id="inv-list-container">
+          <div class="loading"><div class="spinner"></div>Cargando equipos…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div id="panel-detail" style="display:none">
+      <div class="back-row">
+        <button class="btn-back" onclick="showPanel('list')">← Volver al Inventario</button>
+      </div>
+      <div class="card" id="detail-card">
+        <!-- filled dynamically -->
+      </div>
+    </div>
+
+    <!-- FORM PANEL -->
+    <div id="panel-form" style="display:none">
+      <div class="back-row">
+        <button class="btn-back" id="form-back-btn">← Volver</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="form-title">Nuevo Equipo</span>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label">ID Inventario (Código Interno) <span>*</span></label>
+              <input class="f-input" id="f-id_inv" placeholder="Ej: INV-001">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Código Activo Fijo</label>
+              <input class="f-input" id="f-cod_activo" placeholder="Ej: CDMB-2024-001">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Equipo / Nombre <span>*</span></label>
+              <input class="f-input" id="f-equipo" placeholder="Ej: Computador portátil">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Marca</label>
+              <input class="f-input" id="f-marca" placeholder="Ej: Dell, HP, Lenovo">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Tipo de Equipo</label>
+              <select class="f-select" id="f-tipo">
+                <option value="">Seleccionar…</option>
+                <option>Computador</option>
+                <option>Portátil</option>
+                <option>Impresora</option>
+                <option>Servidor</option>
+                <option>Red / Comunicaciones</option>
+                <option>Periférico</option>
+                <option>Equipo de Medición</option>
+                <option>Vehículo</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Sede</label>
+              <select class="f-select" id="f-sede">
+                <option value="">Seleccionar…</option>
+                <option>Sede Principal</option>
+                <option>Sede Norte</option>
+                <option>Sede Sur</option>
+                <option>Laboratorio</option>
+                <option>Campo</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Dependencia</label>
+              <input class="f-input" id="f-dependencia" placeholder="Ej: Dirección de Bosques">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Oficina</label>
+              <input class="f-input" id="f-oficina" placeholder="Ej: Oficina 201">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Ubicación</label>
+              <input class="f-input" id="f-ubicacion" placeholder="Ej: Piso 2, sala de reuniones">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Estado Operativo</label>
+              <select class="f-select" id="f-estado">
+                <option value="Activo">Activo</option>
+                <option value="En Mantenimiento">En Mantenimiento</option>
+                <option value="Fuera de Servicio">Fuera de Servicio</option>
+                <option value="Dado de Baja">Dado de Baja</option>
+              </select>
+            </div>
+            <div class="field-group span2">
+              <label class="field-label">Características / Especificaciones</label>
+              <textarea class="f-textarea" id="f-caract" placeholder="RAM, procesador, disco, año de compra…"></textarea>
+            </div>
+            <div class="field-group span2">
+              <label class="field-label">Observación General</label>
+              <textarea class="f-textarea" id="f-observ" placeholder="Notas adicionales sobre el equipo…"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+            <button class="btn btn-secondary" id="form-cancel-btn">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarEquipo()">💾 Guardar Equipo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW: MANTENIMIENTO ═══ -->
+  <div class="view" id="view-mantenimiento">
+    <div id="panel-maint-list">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+        <div>
+          <h2 style="font-size:1.1rem;font-weight:700">Registro de Mantenimiento</h2>
+          <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px" id="maint-count-label">Cargando…</p>
+        </div>
+        <button class="btn btn-primary" onclick="openMaintForm(null)">➕ Nuevo Evento</button>
+      </div>
+
+      <div class="card">
+        <div class="card-body" style="padding-bottom:8px">
+          <div class="search-row">
+            <div class="search-wrap">
+              <span class="ico">🔍</span>
+              <input class="input-search" id="maint-search" placeholder="Buscar por equipo, ID, responsable…" oninput="filterMaint()">
+            </div>
+            <select class="f-select" id="maint-filter-tipo" style="max-width:200px" onchange="filterMaint()">
+              <option value="">Todos los Tipos</option>
+              <option>Preventivo</option>
+              <option>Correctivo</option>
+              <option>Predictivo</option>
+              <option>Inspección</option>
+            </select>
+          </div>
+          <div class="filter-row" id="maint-estado-chips">
+            <button class="filter-chip active" data-estado="" onclick="selectMaintChip(this)">Todos</button>
+            <button class="filter-chip" data-estado="Programado" onclick="selectMaintChip(this)">📅 Programado</button>
+            <button class="filter-chip" data-estado="En Proceso" onclick="selectMaintChip(this)">⚙️ En Proceso</button>
+            <button class="filter-chip" data-estado="Ejecutado" onclick="selectMaintChip(this)">✅ Ejecutado</button>
+            <button class="filter-chip" data-estado="Cancelado" onclick="selectMaintChip(this)">❌ Cancelado</button>
+          </div>
+        </div>
+        <div id="maint-list-container">
+          <div class="loading"><div class="spinner"></div>Cargando eventos…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINT FORM PANEL -->
+    <div id="panel-maint-form" style="display:none">
+      <div class="back-row">
+        <button class="btn-back" onclick="showMaintPanel('list')">← Volver a Mantenimiento</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="maint-form-title">Nuevo Evento de Mantenimiento</span>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label">ID Evento</label>
+              <input class="f-input" id="mf-id_evento" placeholder="Ej: MNT-2024-001">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Equipo (ID Inventario) <span>*</span></label>
+              <select class="f-select" id="mf-equipo-select" onchange="onMaintEquipoChange()">
+                <option value="">Seleccionar equipo…</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Equipo (Referencia)</label>
+              <input class="f-input" id="mf-equipo-ref" readonly placeholder="Se completa al seleccionar">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Sede (Referencia)</label>
+              <input class="f-input" id="mf-sede-ref" readonly>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Tipo de Evento <span>*</span></label>
+              <select class="f-select" id="mf-tipo">
+                <option value="">Seleccionar…</option>
+                <option>Preventivo</option>
+                <option>Correctivo</option>
+                <option>Predictivo</option>
+                <option>Inspección</option>
+                <option>Calibración</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Estado Mantenimiento</label>
+              <select class="f-select" id="mf-estado">
+                <option>Programado</option>
+                <option>En Proceso</option>
+                <option>Ejecutado</option>
+                <option>Cancelado</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Fecha Programada</label>
+              <input type="date" class="f-input" id="mf-fecha-prog">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Fecha Ejecutada</label>
+              <input type="date" class="f-input" id="mf-fecha-ejec">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Próximo Mantenimiento</label>
+              <input type="date" class="f-input" id="mf-fecha-prox">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Responsable</label>
+              <input class="f-input" id="mf-responsable" placeholder="Nombre del técnico">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Cargo del Responsable</label>
+              <input class="f-input" id="mf-cargo" placeholder="Ej: Técnico de Mantenimiento">
+            </div>
+            <div class="field-group span2">
+              <label class="field-label">Descripción / Novedad</label>
+              <textarea class="f-textarea" id="mf-descripcion" placeholder="Detalle de los trabajos realizados o novedades…"></textarea>
+            </div>
+            <div class="field-group span2">
+              <label class="field-label">Observación</label>
+              <textarea class="f-textarea" id="mf-observacion" placeholder="Observaciones adicionales…"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="showMaintPanel('list')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarMaint()">💾 Guardar Evento</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINT DETAIL PANEL -->
+    <div id="panel-maint-detail" style="display:none">
+      <div class="back-row">
+        <button class="btn-back" onclick="showMaintPanel('list')">← Volver a Mantenimiento</button>
+      </div>
+      <div class="card" id="maint-detail-card"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// TOKEN MANAGEMENT
+// ═══════════════════════════════════════════════
+function getToken() {
+  try { return sessionStorage.getItem('sp_token') || ''; } catch(e) { return ''; }
+}
+function setToken(t) {
+  try { sessionStorage.setItem('sp_token', t); } catch(e) {}
+}
+function showTokenBanner(msg, type) {
+  const b = document.getElementById('token-banner');
+  b.textContent = msg;
+  b.className = 'token-banner ' + type;
+  b.hidden = false;
+  if (type === 'ok') setTimeout(() => { b.hidden = true; }, 3000);
+}
+function initTokenUI() {
+  const inp = document.getElementById('token-input');
+  const saved = getToken();
+  if (saved) { inp.value = saved; document.getElementById('token-status').textContent = '✔ Token guardado'; }
+  document.getElementById('btn-save-token').onclick = () => {
+    const t = inp.value.trim();
+    if (!t) { showTokenBanner('Pega el token primero.', 'warn'); return; }
+    setToken(t); document.getElementById('token-status').textContent = '✔ Token guardado';
+    showTokenBanner('Token guardado. Cargando datos…', 'ok');
+    loadDashboard();
+  };
+  document.getElementById('btn-clear-token').onclick = () => {
+    setToken(''); inp.value = ''; document.getElementById('token-status').textContent = '';
+    showTokenBanner('Token borrado. La sesión expirará automáticamente.', 'warn');
+  };
+  document.getElementById('btn-get-token').onclick = () => {
+    window.open('https://developer.microsoft.com/en-us/graph/graph-explorer', '_blank');
+  };
+}
+
+// Config
+const SITE_URL = 'https://cdmbgov.sharepoint.com/sites/RecursosFsicos-Inventario';
+const LIST_INV = 'Inventario_Equipos';
+const LIST_MAINT = 'Estado_Mantenimiento';
+
+// State
+let allEquipos = [];
+let allMaint = [];
+let currentEquipoId = null;
+let currentMaintId = null;
+let bajaEquipoId = null;
+let recuperarEquipoId = null;
+let fotoEquipoId = null;
+let digestCache = null;
+let digestExpiry = 0;
+let editingEquipoId = null;
+let editingMaintId = null;
+let maintFilterEstado = '';
+let invFilterEstado = '';
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function authHeaders(extra) {
+  const tok = getToken();
+  const h = { 'Accept': 'application/json;odata=verbose', ...extra };
+  if (tok) h['Authorization'] = 'Bearer ' + tok;
+  return h;
+}
+
+async function getDigest() {
+  if (digestCache && Date.now() < digestExpiry) return digestCache;
+  const r = await fetch(`${SITE_URL}/_api/contextinfo`, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json;odata=verbose' })
+  });
+  const d = await r.json();
+  digestCache = d.d.GetContextWebInformation.FormDigestValue;
+  digestExpiry = Date.now() + 25 * 60 * 1000;
+  return digestCache;
+}
+
+async function spGet(url) {
+  const r = await fetch(url, { headers: authHeaders() });
+  if (!r.ok) throw new Error(`HTTP ${r.status} — ${r.url}`);
+  return (await r.json()).d;
+}
+
+async function spPost(url, body, method = 'POST', extra = {}) {
+  const digest = await getDigest();
+  const headers = authHeaders({
+    'Content-Type': 'application/json;odata=verbose',
+    'X-RequestDigest': digest,
+    ...extra
+  });
+  if (method !== 'POST') headers['X-HTTP-Method'] = method;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    let msg = `HTTP ${r.status}`;
+    try { const e = await r.json(); msg = e.error?.message?.value || msg; } catch {}
+    throw new Error(msg);
+  }
+  if (r.status === 204) return null;
+  try { return (await r.json()).d; } catch { return null; }
+}
+
+function toast(msg, type = 'default') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warn' ? 'warn' : ''}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, 3500);
+}
+
+function fmtDate(v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  return isNaN(d) ? '—' : d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function todayISO() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function estadoBadge(estado) {
+  const map = {
+    'Activo': 'badge-ok',
+    'En Mantenimiento': 'badge-warn',
+    'Fuera de Servicio': 'badge-danger',
+    'Dado de Baja': 'badge-muted',
+    'Programado': 'badge-info',
+    'En Proceso': 'badge-warn',
+    'Ejecutado': 'badge-ok',
+    'Cancelado': 'badge-muted'
+  };
+  return `<span class="badge ${map[estado] || 'badge-muted'}">${estado || '—'}</span>`;
+}
+
+function equipoIcon(tipo) {
+  const map = {
+    'Computador': '🖥️', 'Portátil': '💻', 'Impresora': '🖨️',
+    'Servidor': '🖧', 'Red / Comunicaciones': '📡', 'Periférico': '🖱️',
+    'Equipo de Medición': '📏', 'Vehículo': '🚗', 'Otro': '📦'
+  };
+  return map[tipo] || '📦';
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function navTo(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`view-${view}`).classList.add('active');
+  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  if (view === 'home') loadHomeStats();
+  if (view === 'inventario') { showPanel('list'); loadEquipos(); }
+  if (view === 'mantenimiento') { showMaintPanel('list'); loadMaint(); }
+}
+
+function showPanel(panel) {
+  ['list','detail','form'].forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    if (el) el.style.display = (p === panel) ? '' : 'none';
+  });
+}
+
+function showMaintPanel(panel) {
+  ['maint-list','maint-form','maint-detail'].forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    if (el) el.style.display = (p.replace('maint-','') === panel.replace('maint-','') || p === `panel-${panel}`) ? '' : 'none';
+  });
+  // Fix: direct mapping
+  document.getElementById('panel-maint-list').style.display = (panel === 'list') ? '' : 'none';
+  document.getElementById('panel-maint-form').style.display = (panel === 'form') ? '' : 'none';
+  document.getElementById('panel-maint-detail').style.display = (panel === 'detail') ? '' : 'none';
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const cur = root.getAttribute('data-theme');
+  root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  try { localStorage.setItem('cdmb-theme', root.getAttribute('data-theme')); } catch {}
+}
+
+// ═══════════════════════════════════════════════
+// HOME STATS
+// ═══════════════════════════════════════════════
+async function loadHomeStats() {
+  try {
+    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=field_10&$top=4999`);
+    const items = data.results || [];
+    const total = items.length;
+    const activo = items.filter(i => i.field_10?.Value === 'Activo' || i.field_10 === 'Activo').length;
+    const mant = items.filter(i => i.field_10?.Value === 'En Mantenimiento' || i.field_10 === 'En Mantenimiento').length;
+    const baja = items.filter(i => i.field_10?.Value === 'Dado de Baja' || i.field_10 === 'Dado de Baja').length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-activo').textContent = activo;
+    document.getElementById('stat-mant').textContent = mant;
+    document.getElementById('stat-baja').textContent = baja;
+
+    // Recent 5
+    const recent = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=Id,Title,field_3,field_9,field_10,field_1,field_12&$orderby=field_12 desc&$top=5`);
+    renderHomeRecent(recent.results || []);
+  } catch(e) {
+    ['stat-total','stat-activo','stat-mant','stat-baja'].forEach(id => document.getElementById(id).textContent = '?');
+    const isCors = e.message === 'Failed to fetch';
+    document.getElementById('home-recent').innerHTML = `<div class="empty"><div>⚠️</div><p style="color:var(--danger)">Error cargando datos: ${e.message}</p>${isCors ? `<p style="font-size:.8rem;margin-top:8px;line-height:1.5">El archivo debe abrirse <strong>directamente</strong> desde SharePoint.<br>Busca el archivo en la biblioteca de documentos y haz clic en <strong>"Abrir en el explorador"</strong> o accede a la URL directa del .html</p>` : `<p style="font-size:.75rem;margin-top:4px">Asegúrese de acceder desde SharePoint</p>`}</div>`;
+  }
+}
+
+function renderHomeRecent(items) {
+  if (!items.length) {
+    document.getElementById('home-recent').innerHTML = '<div class="empty"><div class="empty-ico">📭</div><p>Sin equipos registrados</p></div>';
+    return;
+  }
+  const html = items.map(it => `
+    <div class="equip-row ${getEstado(it) === 'Dado de Baja' ? 'baja' : ''}" onclick="openEquipoDetail(${it.Id})">
+      <div class="equip-icon">${equipoIcon(it.field_9)}</div>
+      <div class="equip-info">
+        <h3>${it.field_3 || it.Title || '—'}</h3>
+        <p>${it.Title || ''} · ${it.field_1?.Value || it.field_1 || '—'} · ${fmtDate(it.field_12)}</p>
+      </div>
+      <div class="equip-badges">${estadoBadge(getEstado(it))}</div>
+    </div>`).join('');
+  document.getElementById('home-recent').innerHTML = `<div class="equip-list">${html}</div>`;
+}
+
+function getEstado(it) {
+  return it.field_10?.Value || it.field_10 || '';
+}
+
+// ═══════════════════════════════════════════════
+// INVENTARIO — LOAD
+// ═══════════════════════════════════════════════
+async function loadEquipos() {
+  document.getElementById('inv-list-container').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando equipos…</div>';
+  try {
+    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=Id,Title,field_1,field_2,field_3,field_4,field_5,field_6,field_7,field_8,field_9,field_10,field_11,field_12,field_13,field_14,Fecha_Baja,Motivo_Baja&$top=4999&$orderby=field_12 desc`);
+    allEquipos = data.results || [];
+    populateSedes();
+    populateTipos();
+    renderEquipos(allEquipos);
+    document.getElementById('inv-count-label').textContent = `${allEquipos.length} equipo${allEquipos.length !== 1 ? 's' : ''} registrados`;
+    // Populate maint form selector
+    populateMaintEquipoSelect();
+  } catch(e) {
+    document.getElementById('inv-list-container').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><p>Error: ${e.message}</p></div>`;
+  }
+}
+
+function populateSedes() {
+  const sedes = [...new Set(allEquipos.map(i => i.field_1?.Value || i.field_1).filter(Boolean))];
+  const sel = document.getElementById('inv-filter-sede');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todas las Sedes</option>' + sedes.map(s => `<option ${s===cur?'selected':''}>${s}</option>`).join('');
+}
+
+function populateTipos() {
+  const tipos = [...new Set(allEquipos.map(i => i.field_9).filter(Boolean))];
+  const sel = document.getElementById('inv-filter-tipo');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todos los Tipos</option>' + tipos.map(t => `<option ${t===cur?'selected':''}>${t}</option>`).join('');
+}
+
+function populateMaintEquipoSelect() {
+  const sel = document.getElementById('mf-equipo-select');
+  const activos = allEquipos.filter(e => getEstado(e) !== 'Dado de Baja');
+  sel.innerHTML = '<option value="">Seleccionar equipo…</option>' + activos.map(e =>
+    `<option value="${e.Id}" data-nombre="${e.field_3 || ''}" data-sede="${e.field_1?.Value || e.field_1 || ''}" data-id="${e.Title || ''}">${e.Title || e.Id} — ${e.field_3 || ''}</option>`
+  ).join('');
+}
+
+function renderEquipos(items) {
+  if (!items.length) {
+    document.getElementById('inv-list-container').innerHTML = '<div class="empty"><div class="empty-ico">📭</div><p>No hay equipos que coincidan con la búsqueda</p></div>';
+    return;
+  }
+  const html = items.map(it => `
+    <div class="equip-row ${getEstado(it)==='Dado de Baja'?'baja':''}" onclick="openEquipoDetail(${it.Id})">
+      <div class="equip-icon">${equipoIcon(it.field_9)}</div>
+      <div class="equip-info">
+        <h3>${it.field_3 || '—'}</h3>
+        <p>${it.Title || ''} · ${it.field_4 || ''} · ${it.field_1?.Value || it.field_1 || '—'} · ${it.field_7 || ''}</p>
+      </div>
+      <div class="equip-badges">
+        ${it.field_9 ? `<span class="badge badge-muted">${it.field_9}</span>` : ''}
+        ${estadoBadge(getEstado(it))}
+      </div>
+    </div>`).join('');
+  document.getElementById('inv-list-container').innerHTML = `<div class="equip-list">${html}</div>`;
+}
+
+function filterEquipos() {
+  const q = document.getElementById('inv-search').value.toLowerCase();
+  const sede = document.getElementById('inv-filter-sede').value;
+  const tipo = document.getElementById('inv-filter-tipo').value;
+  const filtered = allEquipos.filter(it => {
+    const matchQ = !q || [it.Title, it.field_3, it.field_4, it.field_2, it.field_6, it.field_7].some(v => (v||'').toLowerCase().includes(q));
+    const matchSede = !sede || (it.field_1?.Value||it.field_1) === sede;
+    const matchTipo = !tipo || it.field_9 === tipo;
+    const matchEstado = !invFilterEstado || getEstado(it) === invFilterEstado;
+    return matchQ && matchSede && matchTipo && matchEstado;
+  });
+  renderEquipos(filtered);
+}
+
+function selectEstadoChip(btn) {
+  document.querySelectorAll('#estado-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  invFilterEstado = btn.dataset.estado;
+  filterEquipos();
+}
+
+// ═══════════════════════════════════════════════
+// EQUIPO DETAIL
+// ═══════════════════════════════════════════════
+function openEquipoDetail(id) {
+  currentEquipoId = id;
+  const it = allEquipos.find(e => e.Id === id);
+  if (!it) { toast('Equipo no encontrado', 'error'); return; }
+  renderEquipoDetail(it);
+  showPanel('detail');
+}
+
+function renderEquipoDetail(it) {
+  const estado = getEstado(it);
+  const isBaja = estado === 'Dado de Baja';
+  document.getElementById('detail-card').innerHTML = `
+    <div class="detail-header">
+      <div class="big-icon">${equipoIcon(it.field_9)}</div>
+      <div style="flex:1;min-width:0">
+        <h2>${it.field_3 || '—'}</h2>
+        <p>${it.Title || ''} · ${it.field_4 || ''}</p>
+      </div>
+      ${estadoBadge(estado)}
+    </div>
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchDetailTab(this,'tab-info')">📋 Información</button>
+      <button class="detail-tab" onclick="switchDetailTab(this,'tab-fotos')">📷 Fotos</button>
+      <button class="detail-tab" onclick="switchDetailTab(this,'tab-maint')">🔧 Mantenimiento</button>
+      ${isBaja ? `<button class="detail-tab" onclick="switchDetailTab(this,'tab-baja')">🗃️ Baja</button>` : ''}
+    </div>
+
+    <!-- TAB INFO -->
+    <div id="tab-info" class="tab-panel">
+      <div class="info-grid">
+        <div class="info-item"><div class="il">ID Inventario</div><div class="iv">${it.Title || '—'}</div></div>
+        <div class="info-item"><div class="il">Código Activo</div><div class="iv">${it.field_2 || '—'}</div></div>
+        <div class="info-item"><div class="il">Tipo de Equipo</div><div class="iv">${it.field_9 || '—'}</div></div>
+        <div class="info-item"><div class="il">Marca</div><div class="iv">${it.field_4 || '—'}</div></div>
+        <div class="info-item"><div class="il">Sede</div><div class="iv">${it.field_1?.Value || it.field_1 || '—'}</div></div>
+        <div class="info-item"><div class="il">Dependencia</div><div class="iv">${it.field_7 || '—'}</div></div>
+        <div class="info-item"><div class="il">Oficina</div><div class="iv">${it.field_8 || '—'}</div></div>
+        <div class="info-item"><div class="il">Ubicación</div><div class="iv">${it.field_6 || '—'}</div></div>
+        <div class="info-item"><div class="il">Fecha Registro</div><div class="iv">${fmtDate(it.field_12)}</div></div>
+        <div class="info-item"><div class="il">Estado</div><div class="iv">${estadoBadge(estado)}</div></div>
+        ${it.field_5 ? `<div class="info-item" style="grid-column:1/-1"><div class="il">Características</div><div class="iv" style="white-space:pre-wrap">${it.field_5}</div></div>` : ''}
+        ${it.field_11 ? `<div class="info-item" style="grid-column:1/-1"><div class="il">Observación</div><div class="iv" style="white-space:pre-wrap">${it.field_11}</div></div>` : ''}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 20px">
+        <button class="btn btn-ghost btn-sm" onclick="openEquipoForm(${it.Id})">✏️ Editar</button>
+        ${isBaja
+          ? `<button class="btn btn-ok btn-sm" onclick="openRecuperarModal(${it.Id})">♻️ Recuperar Equipo</button>`
+          : `<button class="btn btn-danger btn-sm" onclick="openBajaModal(${it.Id})">🗃️ Dar de Baja</button>`
+        }
+      </div>
+    </div>
+
+    <!-- TAB FOTOS -->
+    <div id="tab-fotos" class="tab-panel" style="display:none">
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span class="section-title">Fotos del Equipo</span>
+          <button class="btn btn-sm btn-primary" onclick="openFotoModal(${it.Id})">📷 Subir Foto</button>
+        </div>
+        <div id="fotos-grid-${it.Id}">
+          <div class="loading"><div class="spinner"></div>Cargando fotos…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB MAINT -->
+    <div id="tab-maint" class="tab-panel" style="display:none">
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span class="section-title">Historial de Mantenimiento</span>
+          <button class="btn btn-sm btn-primary" onclick="openMaintFormForEquipo(${it.Id})">➕ Nuevo Evento</button>
+        </div>
+        <div id="maint-hist-${it.Id}">
+          <div class="loading"><div class="spinner"></div>Cargando…</div>
+        </div>
+      </div>
+    </div>
+
+    ${isBaja ? `
+    <!-- TAB BAJA -->
+    <div id="tab-baja" class="tab-panel" style="display:none">
+      <div style="padding:20px">
+        <div class="alert alert-danger" style="margin-bottom:16px">⚠️ Este equipo está dado de baja</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="il">Fecha de Baja</div><div class="iv">${fmtDate(it.Fecha_Baja)}</div></div>
+          <div class="info-item" style="grid-column:1/-1"><div class="il">Motivo de Baja</div><div class="iv" style="white-space:pre-wrap">${it.Motivo_Baja || '—'}</div></div>
+        </div>
+        <div style="padding-top:8px">
+          <button class="btn btn-ok" onclick="openRecuperarModal(${it.Id})">♻️ Recuperar este Equipo</button>
+        </div>
+      </div>
+    </div>` : ''}
+  `;
+  // Load fotos and maint when tabs open
+}
+
+function switchDetailTab(btn, tabId) {
+  btn.closest('.card').querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.card').querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  const panel = document.getElementById(tabId);
+  if (panel) panel.style.display = '';
+
+  if (tabId.startsWith('tab-fotos')) loadFotos(currentEquipoId);
+  if (tabId.startsWith('tab-maint')) loadMaintForEquipo(currentEquipoId);
+}
+
+// ═══════════════════════════════════════════════
+// PHOTOS
+// ═══════════════════════════════════════════════
+async function loadFotos(itemId) {
+  const container = document.getElementById(`fotos-grid-${itemId}`);
+  if (!container) return;
+  try {
+    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${itemId})/AttachmentFiles`);
+    const files = data.results || [];
+    if (!files.length) {
+      container.innerHTML = '<div class="empty"><div class="empty-ico">📷</div><p>No hay fotos aún</p><p style="font-size:.78rem;color:var(--text-muted);margin-top:4px">Use el botón "Subir Foto" para agregar imágenes</p></div>';
+      return;
+    }
+    container.innerHTML = `<div class="photo-grid">
+      ${files.map(f => `
+        <div class="photo-thumb" onclick="viewPhoto('${f.ServerRelativeUrl}')">
+          <img src="${SITE_URL}/_layouts/15/download.aspx?sourceurl=${encodeURIComponent(f.ServerRelativeUrl)}" alt="${f.FileName}" loading="lazy">
+        </div>
+      `).join('')}
+    </div>`;
+  } catch(e) {
+    container.innerHTML = `<div class="empty"><div>⚠️</div><p>${e.message}</p></div>`;
+  }
+}
+
+function viewPhoto(url) {
+  const full = `${SITE_URL}/_layouts/15/download.aspx?sourceurl=${encodeURIComponent(url)}`;
+  document.getElementById('photo-viewer-img').src = full;
+  document.getElementById('photo-viewer').classList.add('open');
+}
+
+function openFotoModal(itemId) {
+  fotoEquipoId = itemId;
+  document.getElementById('foto-desc').value = '';
+  document.getElementById('foto-file-input').value = '';
+  document.getElementById('foto-preview').style.display = 'none';
+  document.getElementById('foto-name').textContent = '';
+  document.getElementById('modal-foto').classList.add('open');
+}
+function closeFotoModal() { document.getElementById('modal-foto').classList.remove('open'); }
+
+function previewFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('foto-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('foto-preview');
+    img.src = e.target.result;
+    img.style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function subirFoto() {
+  const file = document.getElementById('foto-file-input').files[0];
+  if (!file) { toast('Seleccione un archivo primero', 'error'); return; }
+  if (file.size > 10 * 1024 * 1024) { toast('El archivo supera 10 MB', 'error'); return; }
+  try {
+    const digest = await getDigest();
+    const fname = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const buf = await file.arrayBuffer();
+    const r = await fetch(
+      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${fotoEquipoId})/AttachmentFiles/add(FileName='${encodeURIComponent(fname)}')`,
+      {
+        method: 'POST',
+        headers: authHeaders({ 'X-RequestDigest': digest, 'Content-Type': 'application/octet-stream' }),
+        body: buf
+      }
+    );
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    toast('Foto subida correctamente', 'success');
+    closeFotoModal();
+    loadFotos(fotoEquipoId);
+  } catch(e) {
+    toast(`Error al subir foto: ${e.message}`, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// EQUIPO FORM
+// ═══════════════════════════════════════════════
+function openEquipoForm(id) {
+  editingEquipoId = id;
+  const isEdit = id !== null;
+  document.getElementById('form-title').textContent = isEdit ? 'Editar Equipo' : 'Nuevo Equipo';
+  document.getElementById('form-back-btn').onclick = () => {
+    if (isEdit) { showPanel('detail'); }
+    else { showPanel('list'); }
+  };
+  document.getElementById('form-cancel-btn').onclick = () => {
+    if (isEdit) { showPanel('detail'); }
+    else { showPanel('list'); }
+  };
+
+  if (isEdit) {
+    const it = allEquipos.find(e => e.Id === id);
+    if (!it) return;
+    document.getElementById('f-id_inv').value = it.Title || '';
+    document.getElementById('f-id_inv').readOnly = true;
+    document.getElementById('f-cod_activo').value = it.field_2 || '';
+    document.getElementById('f-equipo').value = it.field_3 || '';
+    document.getElementById('f-marca').value = it.field_4 || '';
+    document.getElementById('f-caract').value = it.field_5 || '';
+    document.getElementById('f-ubicacion').value = it.field_6 || '';
+    document.getElementById('f-dependencia').value = it.field_7 || '';
+    document.getElementById('f-oficina').value = it.field_8 || '';
+    document.getElementById('f-tipo').value = it.field_9 || '';
+    document.getElementById('f-estado').value = getEstado(it) || 'Activo';
+    document.getElementById('f-sede').value = it.field_1?.Value || it.field_1 || '';
+    document.getElementById('f-observ').value = it.field_11 || '';
+  } else {
+    document.getElementById('f-id_inv').value = '';
+    document.getElementById('f-id_inv').readOnly = false;
+    ['f-cod_activo','f-equipo','f-marca','f-caract','f-ubicacion','f-dependencia','f-oficina','f-observ'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-tipo').value = '';
+    document.getElementById('f-sede').value = '';
+    document.getElementById('f-estado').value = 'Activo';
+  }
+  showPanel('form');
+}
+
+async function guardarEquipo() {
+  const title = document.getElementById('f-id_inv').value.trim();
+  const equipo = document.getElementById('f-equipo').value.trim();
+  if (!title) { toast('El ID Inventario es obligatorio', 'error'); return; }
+  if (!equipo) { toast('El nombre del equipo es obligatorio', 'error'); return; }
+
+  const body = {
+    '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
+    'Title': title,
+    'field_2': document.getElementById('f-cod_activo').value.trim() || null,
+    'field_3': equipo,
+    'field_4': document.getElementById('f-marca').value.trim() || null,
+    'field_5': document.getElementById('f-caract').value.trim() || null,
+    'field_6': document.getElementById('f-ubicacion').value.trim() || null,
+    'field_7': document.getElementById('f-dependencia').value.trim() || null,
+    'field_8': document.getElementById('f-oficina').value.trim() || null,
+    'field_9': document.getElementById('f-tipo').value || null,
+    'field_10': document.getElementById('f-estado').value || 'Activo',
+    'field_11': document.getElementById('f-observ').value.trim() || null,
+  };
+  const sede = document.getElementById('f-sede').value;
+  if (sede) body['field_1'] = sede;
+  if (!editingEquipoId) body['field_12'] = new Date().toISOString();
+
+  try {
+    if (editingEquipoId) {
+      await spPost(
+        `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${editingEquipoId})`,
+        body, 'MERGE', { 'IF-MATCH': '*' }
+      );
+      toast('Equipo actualizado', 'success');
+    } else {
+      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items`, body);
+      toast('Equipo registrado exitosamente', 'success');
+    }
+    await loadEquipos();
+    if (editingEquipoId) {
+      openEquipoDetail(editingEquipoId);
+    } else {
+      showPanel('list');
+    }
+  } catch(e) {
+    toast(`Error al guardar: ${e.message}`, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// DAR DE BAJA / RECUPERAR
+// ═══════════════════════════════════════════════
+function openBajaModal(id) {
+  bajaEquipoId = id;
+  const it = allEquipos.find(e => e.Id === id);
+  document.getElementById('baja-equipo').value = `${it?.field_3 || ''} (${it?.Title || id})`;
+  document.getElementById('baja-fecha').value = todayISO();
+  document.getElementById('baja-motivo').value = '';
+  document.getElementById('modal-baja').classList.add('open');
+}
+function closeBajaModal() { document.getElementById('modal-baja').classList.remove('open'); }
+
+async function confirmarBaja() {
+  const fecha = document.getElementById('baja-fecha').value;
+  const motivo = document.getElementById('baja-motivo').value.trim();
+  if (!fecha) { toast('Seleccione la fecha de baja', 'error'); return; }
+  if (!motivo) { toast('Ingrese el motivo de baja', 'error'); return; }
+  try {
+    await spPost(
+      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${bajaEquipoId})`,
+      {
+        '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
+        'field_10': 'Dado de Baja',
+        'Fecha_Baja': new Date(fecha).toISOString(),
+        'Motivo_Baja': motivo
+      }, 'MERGE', { 'IF-MATCH': '*' }
+    );
+    toast('Equipo dado de baja correctamente', 'success');
+    closeBajaModal();
+    await loadEquipos();
+    const it = allEquipos.find(e => e.Id === bajaEquipoId);
+    if (it) renderEquipoDetail(it);
+  } catch(e) {
+    toast(`Error: ${e.message}`, 'error');
+  }
+}
+
+function openRecuperarModal(id) {
+  recuperarEquipoId = id;
+  const it = allEquipos.find(e => e.Id === id);
+  document.getElementById('rec-equipo').value = `${it?.field_3 || ''} (${it?.Title || id})`;
+  document.getElementById('rec-motivo').value = '';
+  document.getElementById('modal-recuperar').classList.add('open');
+}
+function closeRecuperarModal() { document.getElementById('modal-recuperar').classList.remove('open'); }
+
+async function confirmarRecuperar() {
+  const motivo = document.getElementById('rec-motivo').value.trim();
+  if (!motivo) { toast('Ingrese el motivo de recuperación', 'error'); return; }
+  try {
+    await spPost(
+      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${recuperarEquipoId})`,
+      {
+        '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
+        'field_10': 'Activo',
+        'Fecha_Baja': null,
+        'Motivo_Baja': `[RECUPERADO] ${motivo}`
+      }, 'MERGE', { 'IF-MATCH': '*' }
+    );
+    toast('Equipo recuperado exitosamente', 'success');
+    closeRecuperarModal();
+    await loadEquipos();
+    const it = allEquipos.find(e => e.Id === recuperarEquipoId);
+    if (it) renderEquipoDetail(it);
+  } catch(e) {
+    toast(`Error: ${e.message}`, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MAINTENANCE — LOAD
+// ═══════════════════════════════════════════════
+async function loadMaint() {
+  document.getElementById('maint-list-container').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando eventos…</div>';
+  try {
+    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items?$select=Id,Title,field_1,field_2,field_3,field_4,field_5,field_6,field_7,field_8,field_9,field_10,field_11,field_13,field_14,Codigo_Activo&$top=4999&$orderby=field_5 desc`);
+    allMaint = data.results || [];
+    renderMaint(allMaint);
+    document.getElementById('maint-count-label').textContent = `${allMaint.length} evento${allMaint.length !== 1 ? 's' : ''} de mantenimiento`;
+    if (!allEquipos.length) await loadEquipos();
+  } catch(e) {
+    document.getElementById('maint-list-container').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><p>Error: ${e.message}</p></div>`;
+  }
+}
+
+async function loadMaintForEquipo(itemId) {
+  const container = document.getElementById(`maint-hist-${itemId}`);
+  if (!container) return;
+  try {
+    const it = allEquipos.find(e => e.Id === itemId);
+    const idInv = it?.Title || '';
+    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items?$filter=field_1 eq '${encodeURIComponent(idInv)}'&$orderby=field_5 desc&$top=100`);
+    const items = data.results || [];
+    if (!items.length) {
+      container.innerHTML = '<div class="empty"><div class="empty-ico">🔧</div><p>Sin eventos de mantenimiento registrados</p></div>';
+      return;
+    }
+    container.innerHTML = items.map(m => `
+      <div class="maint-item">
+        <div class="maint-item-header">
+          <div class="timeline-dot" style="background:var(--teal-pale);color:var(--teal-dark)">🔧</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:.88rem">${m.field_4?.Value || m.field_4 || '—'} · ${m.Title || m.Id}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">${fmtDate(m.field_5)} · ${m.field_10 || '—'}</div>
+          </div>
+          ${estadoBadge(m.field_9?.Value || m.field_9)}
+        </div>
+        ${(m.field_13 || m.field_14) ? `<div class="maint-item-body">
+          ${m.field_13 ? `<p><strong>Novedad:</strong> ${m.field_13}</p>` : ''}
+          ${m.field_14 ? `<p style="margin-top:4px"><strong>Observación:</strong> ${m.field_14}</p>` : ''}
+          ${m.field_7 ? `<p style="margin-top:4px;font-size:.75rem;color:var(--text-muted)">Ejecutado: ${fmtDate(m.field_7)} · Próximo: ${fmtDate(m.field_8)}</p>` : ''}
+        </div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    if (container) container.innerHTML = `<div class="empty"><div>⚠️</div><p>${e.message}</p></div>`;
+  }
+}
+
+function renderMaint(items) {
+  if (!items.length) {
+    document.getElementById('maint-list-container').innerHTML = '<div class="empty"><div class="empty-ico">🔧</div><p>No hay eventos de mantenimiento</p></div>';
+    return;
+  }
+  const html = items.map(m => `
+    <div class="equip-row" onclick="openMaintDetail(${m.Id})">
+      <div class="equip-icon">🔧</div>
+      <div class="equip-info">
+        <h3>${m.field_2 || m.field_1 || '—'} <span style="font-weight:400;color:var(--text-muted);font-size:.82em">· ${m.Title || m.Id}</span></h3>
+        <p>${m.field_4?.Value || m.field_4 || '—'} · ${fmtDate(m.field_5)} · ${m.field_10 || '—'}</p>
+      </div>
+      <div class="equip-badges">
+        ${m.field_4 ? `<span class="badge badge-info">${m.field_4?.Value||m.field_4}</span>` : ''}
+        ${estadoBadge(m.field_9?.Value || m.field_9)}
+      </div>
+    </div>`).join('');
+  document.getElementById('maint-list-container').innerHTML = `<div class="equip-list">${html}</div>`;
+}
+
+function filterMaint() {
+  const q = document.getElementById('maint-search').value.toLowerCase();
+  const tipo = document.getElementById('maint-filter-tipo').value;
+  const filtered = allMaint.filter(m => {
+    const matchQ = !q || [m.Title, m.field_1, m.field_2, m.field_10].some(v => (v||'').toLowerCase().includes(q));
+    const matchTipo = !tipo || (m.field_4?.Value || m.field_4) === tipo;
+    const matchEstado = !maintFilterEstado || (m.field_9?.Value || m.field_9) === maintFilterEstado;
+    return matchQ && matchTipo && matchEstado;
+  });
+  renderMaint(filtered);
+}
+
+function selectMaintChip(btn) {
+  document.querySelectorAll('#maint-estado-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  maintFilterEstado = btn.dataset.estado;
+  filterMaint();
+}
+
+function openMaintDetail(id) {
+  const m = allMaint.find(x => x.Id === id);
+  if (!m) return;
+  document.getElementById('maint-detail-card').innerHTML = `
+    <div class="detail-header">
+      <div class="big-icon">🔧</div>
+      <div style="flex:1;min-width:0">
+        <h2>${m.field_2 || m.field_1 || '—'}</h2>
+        <p>Evento ${m.Title || m.Id} · ${m.field_4?.Value || m.field_4 || '—'}</p>
+      </div>
+      ${estadoBadge(m.field_9?.Value || m.field_9)}
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="il">ID Evento</div><div class="iv">${m.Title || '—'}</div></div>
+      <div class="info-item"><div class="il">ID Inventario</div><div class="iv">${m.field_1 || '—'}</div></div>
+      <div class="info-item"><div class="il">Equipo</div><div class="iv">${m.field_2 || '—'}</div></div>
+      <div class="info-item"><div class="il">Sede</div><div class="iv">${m.field_3?.Value || m.field_3 || '—'}</div></div>
+      <div class="info-item"><div class="il">Tipo</div><div class="iv">${m.field_4?.Value || m.field_4 || '—'}</div></div>
+      <div class="info-item"><div class="il">Estado</div><div class="iv">${estadoBadge(m.field_9?.Value || m.field_9)}</div></div>
+      <div class="info-item"><div class="il">Fecha Registro</div><div class="iv">${fmtDate(m.field_5)}</div></div>
+      <div class="info-item"><div class="il">Fecha Programada</div><div class="iv">${fmtDate(m.field_6)}</div></div>
+      <div class="info-item"><div class="il">Fecha Ejecutada</div><div class="iv">${fmtDate(m.field_7)}</div></div>
+      <div class="info-item"><div class="il">Próximo Mant.</div><div class="iv">${fmtDate(m.field_8)}</div></div>
+      <div class="info-item"><div class="il">Responsable</div><div class="iv">${m.field_10 || '—'}</div></div>
+      <div class="info-item"><div class="il">Cargo</div><div class="iv">${m.field_11 || '—'}</div></div>
+      ${m.field_13 ? `<div class="info-item" style="grid-column:1/-1"><div class="il">Descripción / Novedad</div><div class="iv" style="white-space:pre-wrap">${m.field_13}</div></div>` : ''}
+      ${m.field_14 ? `<div class="info-item" style="grid-column:1/-1"><div class="il">Observación</div><div class="iv" style="white-space:pre-wrap">${m.field_14}</div></div>` : ''}
+    </div>
+    <div style="padding:0 20px 20px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="openMaintForm(${m.Id})">✏️ Editar</button>
+    </div>
+  `;
+  showMaintPanel('detail');
+}
+
+// ═══════════════════════════════════════════════
+// MAINT FORM
+// ═══════════════════════════════════════════════
+function openMaintForm(id) {
+  editingMaintId = id;
+  if (!allEquipos.length) loadEquipos();
+  document.getElementById('maint-form-title').textContent = id ? 'Editar Evento' : 'Nuevo Evento de Mantenimiento';
+  if (id) {
+    const m = allMaint.find(x => x.Id === id);
+    if (m) {
+      document.getElementById('mf-id_evento').value = m.Title || '';
+      document.getElementById('mf-equipo-ref').value = m.field_2 || '';
+      document.getElementById('mf-sede-ref').value = m.field_3?.Value || m.field_3 || '';
+      document.getElementById('mf-tipo').value = m.field_4?.Value || m.field_4 || '';
+      document.getElementById('mf-estado').value = m.field_9?.Value || m.field_9 || 'Programado';
+      document.getElementById('mf-fecha-prog').value = m.field_6 ? m.field_6.split('T')[0] : '';
+      document.getElementById('mf-fecha-ejec').value = m.field_7 ? m.field_7.split('T')[0] : '';
+      document.getElementById('mf-fecha-prox').value = m.field_8 ? m.field_8.split('T')[0] : '';
+      document.getElementById('mf-responsable').value = m.field_10 || '';
+      document.getElementById('mf-cargo').value = m.field_11 || '';
+      document.getElementById('mf-descripcion').value = m.field_13 || '';
+      document.getElementById('mf-observacion').value = m.field_14 || '';
+    }
+  } else {
+    ['mf-id_evento','mf-equipo-ref','mf-sede-ref','mf-fecha-prog','mf-fecha-ejec','mf-fecha-prox','mf-responsable','mf-cargo','mf-descripcion','mf-observacion'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('mf-tipo').value = '';
+    document.getElementById('mf-estado').value = 'Programado';
+    document.getElementById('mf-equipo-select').value = '';
+  }
+  showMaintPanel('form');
+}
+
+function openMaintFormForEquipo(equipoId) {
+  navTo('mantenimiento');
+  setTimeout(() => {
+    openMaintForm(null);
+    const it = allEquipos.find(e => e.Id === equipoId);
+    if (it) {
+      document.getElementById('mf-equipo-select').value = equipoId;
+      document.getElementById('mf-equipo-ref').value = it.field_3 || '';
+      document.getElementById('mf-sede-ref').value = it.field_1?.Value || it.field_1 || '';
+      document.getElementById('mf-id_evento').value = '';
+    }
+  }, 200);
+}
+
+function onMaintEquipoChange() {
+  const sel = document.getElementById('mf-equipo-select');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt) {
+    document.getElementById('mf-equipo-ref').value = opt.getAttribute('data-nombre') || '';
+    document.getElementById('mf-sede-ref').value = opt.getAttribute('data-sede') || '';
+  }
+}
+
+async function guardarMaint() {
+  const titulo = document.getElementById('mf-id_evento').value.trim();
+  const tipo = document.getElementById('mf-tipo').value;
+  const equipoSel = document.getElementById('mf-equipo-select');
+  const idInvFromSel = equipoSel.options[equipoSel.selectedIndex]?.getAttribute('data-id') || '';
+  const equipoRef = document.getElementById('mf-equipo-ref').value.trim();
+  if (!titulo) { toast('El ID de Evento es obligatorio', 'error'); return; }
+  if (!tipo) { toast('Seleccione el Tipo de Evento', 'error'); return; }
+
+  const body = {
+    '__metadata': { 'type': `SP.Data.${LIST_MAINT.replace(/_/g,'')}ListItem` },
+    'Title': titulo,
+    'field_1': idInvFromSel || document.getElementById('mf-id_evento').value,
+    'field_2': equipoRef,
+    'field_3': document.getElementById('mf-sede-ref').value || null,
+    'field_4': tipo,
+    'field_9': document.getElementById('mf-estado').value,
+    'field_10': document.getElementById('mf-responsable').value.trim() || null,
+    'field_11': document.getElementById('mf-cargo').value.trim() || null,
+    'field_13': document.getElementById('mf-descripcion').value.trim() || null,
+    'field_14': document.getElementById('mf-observacion').value.trim() || null,
+  };
+  const fp = document.getElementById('mf-fecha-prog').value;
+  const fe = document.getElementById('mf-fecha-ejec').value;
+  const fpr = document.getElementById('mf-fecha-prox').value;
+  if (!editingMaintId) body['field_5'] = new Date().toISOString();
+  if (fp) body['field_6'] = new Date(fp).toISOString();
+  if (fe) body['field_7'] = new Date(fe).toISOString();
+  if (fpr) body['field_8'] = new Date(fpr).toISOString();
+
+  // Also store Codigo_Activo if equipo selected
+  const selOpt = equipoSel.options[equipoSel.selectedIndex];
+  if (selOpt) {
+    const it = allEquipos.find(e => e.Id === parseInt(equipoSel.value));
+    if (it) body['Codigo_Activo'] = it.field_2 || '';
+  }
+
+  try {
+    if (editingMaintId) {
+      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items(${editingMaintId})`, body, 'MERGE', { 'IF-MATCH': '*' });
+      toast('Evento actualizado', 'success');
+    } else {
+      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items`, body);
+      toast('Evento registrado exitosamente', 'success');
+    }
+    await loadMaint();
+    showMaintPanel('list');
+  } catch(e) {
+    toast(`Error al guardar: ${e.message}`, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(function init() {
+  // Apply saved theme
+  try {
+    const t = localStorage.getItem('cdmb-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  } catch {}
+  // Init token UI
+  initTokenUI();
+  // Load home stats only if token exists
+  if (getToken()) loadHomeStats();
+  else {
+    // Show a friendly message in the home view
+    const el = document.getElementById('home-view');
+    if (el) {
+      const msg = document.createElement('div');
+      msg.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.95rem';
+      msg.innerHTML = '🔑 Ingresa tu token Microsoft arriba para cargar los datos del inventario.';
+      el.appendChild(msg);
+    }
+  }
+})();
+</script>
+
+</body></html>
