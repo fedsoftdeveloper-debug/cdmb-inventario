@@ -1004,7 +1004,7 @@ function initTokenUI() {
     if (!t) { showTokenBanner('Pega el token primero.', 'warn'); return; }
     setToken(t); document.getElementById('token-status').textContent = '✔ Token guardado';
     showTokenBanner('Token guardado. Cargando datos…', 'ok');
-    loadDashboard();
+    loadHomeStats();
   };
   document.getElementById('btn-clear-token').onclick = () => {
     setToken(''); inp.value = ''; document.getElementById('token-status').textContent = '';
@@ -1015,8 +1015,9 @@ function initTokenUI() {
   };
 }
 
-// Config
-const SITE_URL = 'https://cdmbgov.sharepoint.com/sites/RecursosFsicos-Inventario';
+// Config — Microsoft Graph API
+const GRAPH = 'https://graph.microsoft.com/v1.0';
+const SP_SITE = `${GRAPH}/sites/cdmbgov.sharepoint.com:/sites/RecursosFsicos-Inventario:`;
 const LIST_INV = 'Inventario_Equipos';
 const LIST_MAINT = 'Estado_Mantenimiento';
 
@@ -1040,49 +1041,54 @@ let invFilterEstado = '';
 // ═══════════════════════════════════════════════
 function authHeaders(extra) {
   const tok = getToken();
-  const h = { 'Accept': 'application/json;odata=verbose', ...extra };
+  const h = { 'Accept': 'application/json', 'Content-Type': 'application/json', ...extra };
   if (tok) h['Authorization'] = 'Bearer ' + tok;
   return h;
 }
 
-async function getDigest() {
-  if (digestCache && Date.now() < digestExpiry) return digestCache;
-  const r = await fetch(`${SITE_URL}/_api/contextinfo`, {
-    method: 'POST',
-    headers: authHeaders({ 'Content-Type': 'application/json;odata=verbose' })
-  });
-  const d = await r.json();
-  digestCache = d.d.GetContextWebInformation.FormDigestValue;
-  digestExpiry = Date.now() + 25 * 60 * 1000;
-  return digestCache;
+// Normalize Graph list item → flat object matching render functions
+function normalizeItem(it) {
+  if (!it) return it;
+  const f = it.fields || it;
+  return { ...f, Id: parseInt(it.id || f.id || f.Id || 0) };
 }
 
 async function spGet(url) {
   const r = await fetch(url, { headers: authHeaders() });
   if (!r.ok) throw new Error(`HTTP ${r.status} — ${r.url}`);
-  return (await r.json()).d;
+  const json = await r.json();
+  if (Array.isArray(json.value)) return { results: json.value.map(normalizeItem) };
+  return normalizeItem(json);
 }
 
 async function spPost(url, body, method = 'POST', extra = {}) {
-  const digest = await getDigest();
-  const headers = authHeaders({
-    'Content-Type': 'application/json;odata=verbose',
-    'X-RequestDigest': digest,
-    ...extra
-  });
-  if (method !== 'POST') headers['X-HTTP-Method'] = method;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body)
+  const fields = { ...body };
+  delete fields.__metadata;
+  let finalUrl = url, finalMethod = method, finalBody;
+  if (method === 'MERGE') {
+    // Graph: PATCH to /fields endpoint for updates
+    finalUrl = url.replace(/\/items\/(\d+)$/, '/items/$1/fields');
+    finalMethod = 'PATCH';
+    finalBody = fields;
+  } else if (method === 'DELETE') {
+    finalMethod = 'DELETE';
+    finalBody = undefined;
+  } else {
+    // POST create — Graph wraps fields in { fields: {...} }
+    finalBody = { fields };
+  }
+  const r = await fetch(finalUrl, {
+    method: finalMethod,
+    headers: authHeaders(extra),
+    body: finalBody !== undefined ? JSON.stringify(finalBody) : undefined
   });
   if (!r.ok) {
     let msg = `HTTP ${r.status}`;
-    try { const e = await r.json(); msg = e.error?.message?.value || msg; } catch {}
+    try { const e = await r.json(); msg = e.error?.message || msg; } catch {}
     throw new Error(msg);
   }
-  if (r.status === 204) return null;
-  try { return (await r.json()).d; } catch { return null; }
+  if (r.status === 204 || r.status === 200) return null;
+  try { return normalizeItem(await r.json()); } catch { return null; }
 }
 
 function toast(msg, type = 'default') {
@@ -1174,24 +1180,24 @@ function toggleTheme() {
 // ═══════════════════════════════════════════════
 async function loadHomeStats() {
   try {
-    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=field_10&$top=4999`);
+    const data = await spGet(`${SP_SITE}/lists/${LIST_INV}/items?$expand=fields($select=field_10)&$top=4999`);
     const items = data.results || [];
     const total = items.length;
-    const activo = items.filter(i => i.field_10?.Value === 'Activo' || i.field_10 === 'Activo').length;
-    const mant = items.filter(i => i.field_10?.Value === 'En Mantenimiento' || i.field_10 === 'En Mantenimiento').length;
-    const baja = items.filter(i => i.field_10?.Value === 'Dado de Baja' || i.field_10 === 'Dado de Baja').length;
+    const activo = items.filter(i => i.field_10 === 'Activo').length;
+    const mant = items.filter(i => i.field_10 === 'En Mantenimiento').length;
+    const baja = items.filter(i => i.field_10 === 'Dado de Baja').length;
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-activo').textContent = activo;
     document.getElementById('stat-mant').textContent = mant;
     document.getElementById('stat-baja').textContent = baja;
 
     // Recent 5
-    const recent = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=Id,Title,field_3,field_9,field_10,field_1,field_12&$orderby=field_12 desc&$top=5`);
-    renderHomeRecent(recent.results || []);
+    const recent = await spGet(`${SP_SITE}/lists/${LIST_INV}/items?$expand=fields($select=id,Title,field_3,field_9,field_10,field_1,field_12)&$top=5`);
+    const recItems = (recent.results || []).sort((a,b) => (b.field_12||'') > (a.field_12||'') ? 1 : -1).slice(0,5);
+    renderHomeRecent(recItems);
   } catch(e) {
     ['stat-total','stat-activo','stat-mant','stat-baja'].forEach(id => document.getElementById(id).textContent = '?');
-    const isCors = e.message === 'Failed to fetch';
-    document.getElementById('home-recent').innerHTML = `<div class="empty"><div>⚠️</div><p style="color:var(--danger)">Error cargando datos: ${e.message}</p>${isCors ? `<p style="font-size:.8rem;margin-top:8px;line-height:1.5">El archivo debe abrirse <strong>directamente</strong> desde SharePoint.<br>Busca el archivo en la biblioteca de documentos y haz clic en <strong>"Abrir en el explorador"</strong> o accede a la URL directa del .html</p>` : `<p style="font-size:.75rem;margin-top:4px">Asegúrese de acceder desde SharePoint</p>`}</div>`;
+      document.getElementById('home-recent').innerHTML = `<div class="empty"><div>⚠️</div><p style="color:var(--danger)">Error cargando datos: ${e.message}</p><p style="font-size:.8rem;margin-top:8px;line-height:1.5">Verifica que el token tenga permisos <strong>Sites.ReadWrite.All</strong> en Graph Explorer.</p></div>`;
   }
 }
 
@@ -1213,7 +1219,7 @@ function renderHomeRecent(items) {
 }
 
 function getEstado(it) {
-  return it.field_10?.Value || it.field_10 || '';
+  return it.field_10 || '';
 }
 
 // ═══════════════════════════════════════════════
@@ -1222,8 +1228,8 @@ function getEstado(it) {
 async function loadEquipos() {
   document.getElementById('inv-list-container').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando equipos…</div>';
   try {
-    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items?$select=Id,Title,field_1,field_2,field_3,field_4,field_5,field_6,field_7,field_8,field_9,field_10,field_11,field_12,field_13,field_14,Fecha_Baja,Motivo_Baja&$top=4999&$orderby=field_12 desc`);
-    allEquipos = data.results || [];
+    const data = await spGet(`${SP_SITE}/lists/${LIST_INV}/items?$expand=fields&$top=4999`);
+    allEquipos = (data.results || []).sort((a,b) => (b.field_12||'') > (a.field_12||'') ? 1 : -1);
     populateSedes();
     populateTipos();
     renderEquipos(allEquipos);
@@ -1415,19 +1421,9 @@ async function loadFotos(itemId) {
   const container = document.getElementById(`fotos-grid-${itemId}`);
   if (!container) return;
   try {
-    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${itemId})/AttachmentFiles`);
-    const files = data.results || [];
-    if (!files.length) {
-      container.innerHTML = '<div class="empty"><div class="empty-ico">📷</div><p>No hay fotos aún</p><p style="font-size:.78rem;color:var(--text-muted);margin-top:4px">Use el botón "Subir Foto" para agregar imágenes</p></div>';
-      return;
-    }
-    container.innerHTML = `<div class="photo-grid">
-      ${files.map(f => `
-        <div class="photo-thumb" onclick="viewPhoto('${f.ServerRelativeUrl}')">
-          <img src="${SITE_URL}/_layouts/15/download.aspx?sourceurl=${encodeURIComponent(f.ServerRelativeUrl)}" alt="${f.FileName}" loading="lazy">
-        </div>
-      `).join('')}
-    </div>`;
+    // Photos stored as SharePoint attachments — accessible only from SharePoint directly
+    container.innerHTML = '<div class="empty"><div class="empty-ico">📷</div><p>Las fotos se gestionan directamente en SharePoint</p><p style="font-size:.78rem;color:var(--text-muted);margin-top:4px">Accede al ítem en la lista SharePoint para ver y subir fotos adjuntas.</p></div>';
+    return;
   } catch(e) {
     container.innerHTML = `<div class="empty"><div>⚠️</div><p>${e.message}</p></div>`;
   }
@@ -1463,28 +1459,8 @@ function previewFoto(input) {
 }
 
 async function subirFoto() {
-  const file = document.getElementById('foto-file-input').files[0];
-  if (!file) { toast('Seleccione un archivo primero', 'error'); return; }
-  if (file.size > 10 * 1024 * 1024) { toast('El archivo supera 10 MB', 'error'); return; }
-  try {
-    const digest = await getDigest();
-    const fname = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const buf = await file.arrayBuffer();
-    const r = await fetch(
-      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${fotoEquipoId})/AttachmentFiles/add(FileName='${encodeURIComponent(fname)}')`,
-      {
-        method: 'POST',
-        headers: authHeaders({ 'X-RequestDigest': digest, 'Content-Type': 'application/octet-stream' }),
-        body: buf
-      }
-    );
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    toast('Foto subida correctamente', 'success');
-    closeFotoModal();
-    loadFotos(fotoEquipoId);
-  } catch(e) {
-    toast(`Error al subir foto: ${e.message}`, 'error');
-  }
+  toast('La subida de fotos se realiza directamente en SharePoint. Accede al ítem en la lista para adjuntar archivos.', 'warn');
+  closeFotoModal();
 }
 
 // ═══════════════════════════════════════════════
@@ -1537,7 +1513,6 @@ async function guardarEquipo() {
   if (!equipo) { toast('El nombre del equipo es obligatorio', 'error'); return; }
 
   const body = {
-    '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
     'Title': title,
     'field_2': document.getElementById('f-cod_activo').value.trim() || null,
     'field_3': equipo,
@@ -1556,13 +1531,10 @@ async function guardarEquipo() {
 
   try {
     if (editingEquipoId) {
-      await spPost(
-        `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${editingEquipoId})`,
-        body, 'MERGE', { 'IF-MATCH': '*' }
-      );
+      await spPost(`${SP_SITE}/lists/${LIST_INV}/items/${editingEquipoId}`, body, 'MERGE');
       toast('Equipo actualizado', 'success');
     } else {
-      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items`, body);
+      await spPost(`${SP_SITE}/lists/${LIST_INV}/items`, body);
       toast('Equipo registrado exitosamente', 'success');
     }
     await loadEquipos();
@@ -1595,15 +1567,11 @@ async function confirmarBaja() {
   if (!fecha) { toast('Seleccione la fecha de baja', 'error'); return; }
   if (!motivo) { toast('Ingrese el motivo de baja', 'error'); return; }
   try {
-    await spPost(
-      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${bajaEquipoId})`,
-      {
-        '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
-        'field_10': 'Dado de Baja',
-        'Fecha_Baja': new Date(fecha).toISOString(),
-        'Motivo_Baja': motivo
-      }, 'MERGE', { 'IF-MATCH': '*' }
-    );
+    await spPost(`${SP_SITE}/lists/${LIST_INV}/items/${bajaEquipoId}`, {
+      'field_10': 'Dado de Baja',
+      'Fecha_Baja': new Date(fecha).toISOString(),
+      'Motivo_Baja': motivo
+    }, 'MERGE');
     toast('Equipo dado de baja correctamente', 'success');
     closeBajaModal();
     await loadEquipos();
@@ -1627,15 +1595,11 @@ async function confirmarRecuperar() {
   const motivo = document.getElementById('rec-motivo').value.trim();
   if (!motivo) { toast('Ingrese el motivo de recuperación', 'error'); return; }
   try {
-    await spPost(
-      `${SITE_URL}/_api/web/lists/getbytitle('${LIST_INV}')/items(${recuperarEquipoId})`,
-      {
-        '__metadata': { 'type': `SP.Data.${LIST_INV.replace(/_/g,'')}ListItem` },
-        'field_10': 'Activo',
-        'Fecha_Baja': null,
-        'Motivo_Baja': `[RECUPERADO] ${motivo}`
-      }, 'MERGE', { 'IF-MATCH': '*' }
-    );
+    await spPost(`${SP_SITE}/lists/${LIST_INV}/items/${recuperarEquipoId}`, {
+      'field_10': 'Activo',
+      'Fecha_Baja': null,
+      'Motivo_Baja': `[RECUPERADO] ${motivo}`
+    }, 'MERGE');
     toast('Equipo recuperado exitosamente', 'success');
     closeRecuperarModal();
     await loadEquipos();
@@ -1652,8 +1616,8 @@ async function confirmarRecuperar() {
 async function loadMaint() {
   document.getElementById('maint-list-container').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando eventos…</div>';
   try {
-    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items?$select=Id,Title,field_1,field_2,field_3,field_4,field_5,field_6,field_7,field_8,field_9,field_10,field_11,field_13,field_14,Codigo_Activo&$top=4999&$orderby=field_5 desc`);
-    allMaint = data.results || [];
+    const data = await spGet(`${SP_SITE}/lists/${LIST_MAINT}/items?$expand=fields&$top=4999`);
+    allMaint = (data.results || []).sort((a,b) => (b.field_5||'') > (a.field_5||'') ? 1 : -1);
     renderMaint(allMaint);
     document.getElementById('maint-count-label').textContent = `${allMaint.length} evento${allMaint.length !== 1 ? 's' : ''} de mantenimiento`;
     if (!allEquipos.length) await loadEquipos();
@@ -1668,8 +1632,13 @@ async function loadMaintForEquipo(itemId) {
   try {
     const it = allEquipos.find(e => e.Id === itemId);
     const idInv = it?.Title || '';
-    const data = await spGet(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items?$filter=field_1 eq '${encodeURIComponent(idInv)}'&$orderby=field_5 desc&$top=100`);
-    const items = data.results || [];
+    let items;
+    if (allMaint.length) {
+      items = allMaint.filter(m => m.field_1 === idInv).sort((a,b) => (b.field_5||'') > (a.field_5||'') ? 1 : -1);
+    } else {
+      const data = await spGet(`${SP_SITE}/lists/${LIST_MAINT}/items?$expand=fields&$top=4999`);
+      items = (data.results || []).filter(m => m.field_1 === idInv).sort((a,b) => (b.field_5||'') > (a.field_5||'') ? 1 : -1);
+    }
     if (!items.length) {
       container.innerHTML = '<div class="empty"><div class="empty-ico">🔧</div><p>Sin eventos de mantenimiento registrados</p></div>';
       return;
@@ -1834,7 +1803,6 @@ async function guardarMaint() {
   if (!tipo) { toast('Seleccione el Tipo de Evento', 'error'); return; }
 
   const body = {
-    '__metadata': { 'type': `SP.Data.${LIST_MAINT.replace(/_/g,'')}ListItem` },
     'Title': titulo,
     'field_1': idInvFromSel || document.getElementById('mf-id_evento').value,
     'field_2': equipoRef,
@@ -1863,10 +1831,10 @@ async function guardarMaint() {
 
   try {
     if (editingMaintId) {
-      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items(${editingMaintId})`, body, 'MERGE', { 'IF-MATCH': '*' });
+      await spPost(`${SP_SITE}/lists/${LIST_MAINT}/items/${editingMaintId}`, body, 'MERGE');
       toast('Evento actualizado', 'success');
     } else {
-      await spPost(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_MAINT}')/items`, body);
+      await spPost(`${SP_SITE}/lists/${LIST_MAINT}/items`, body);
       toast('Evento registrado exitosamente', 'success');
     }
     await loadMaint();
